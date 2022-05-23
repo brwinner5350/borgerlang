@@ -1,2 +1,5 @@
 # Build tree subdirectory
 build
+
+# Visual Studio Code files
+.vscode
