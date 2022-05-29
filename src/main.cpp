@@ -1,30 +1,35 @@
 // main.cpp
-#include "llvm/IR/Module.h"
-#include "llvm/IR/IRBuilder.h"
+#include <iostream>
+#include <stdio.h>
+#include "codegen.h"
+#include "node.h"
 
-int main() {
-    llvm::LLVMContext context;
+using namespace llvm;
 
-    std::unique_ptr<llvm::Module> mod;
-    mod = std::make_unique<llvm::Module>("Borgerlang module", context);
+extern NBlock *programBlock;
+extern int yyparse();
+extern FILE* yyin;
 
-    // Build the IR for this block
-    llvm::IRBuilder<> builder(context);
+void createCorefuncs(CodeGenContext& context);
 
-    // Main returns void
-    llvm::FunctionType *mainReturnType = 
-        llvm::FunctionType::get(llvm::Type::getVoidTy(context), false);
+int main() 
+{
+    FILE* fp = fopen("./code.bgl", "r");
+    if (fp) // the last thing we want is to parse a file that doesn't exist
+        yyin = fp;
+    else
+        std::cout << "code.bgl not found, enter code in stdin:" << std::endl;    
+    yyparse();
+    std::cout << programBlock << std::endl;
 
-    // The main function
-    llvm::Function *mainFunction =
-        llvm::Function::Create(mainReturnType, llvm::Function::ExternalLinkage, "borger_entry", mod.get()); // TODO: change this to main later on
+    InitializeNativeTarget();
+    InitializeNativeTargetAsmPrinter();
+    InitializeNativeTargetAsmParser();
 
-    // Create the function's body
-    llvm::BasicBlock *body = llvm::BasicBlock::Create(context, "body", mainFunction);
-    builder.SetInsertPoint(body);
-
-    builder.CreateRetVoid();
-    mod->print(llvm::outs(), nullptr);
+    CodeGenContext context;
+    createCorefuncs(context);
+    context.generateCode(*programBlock);
+    context.runCode();
 
     return 0;
 }

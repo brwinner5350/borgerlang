@@ -39,6 +39,6 @@
 "*"		          				return TOKEN(TMUL);
 "/"				          		return TOKEN(TDIV);
 
-.                       printf("Unknown token:\n"); yyterminate();
+.                       printf("Unknown token!\n"); yyterminate();
 
 %%

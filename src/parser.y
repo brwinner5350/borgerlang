@@ -5,7 +5,7 @@
 	NBlock *programBlock; /* the top level root node of our final AST */
 
 	extern int yylex();
-	void yyerror(const char *s) { std::printf("Error: %s\n", s);std::exit(1); }
+	void yyerror(const char *s) { std::printf("Compiler error: %s\n", s);std::exit(1); }
 %}
 
 /* All the data. */
