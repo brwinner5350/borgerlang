@@ -7,18 +7,27 @@
 using namespace llvm;
 
 extern NBlock *programBlock;
-extern int yyparse();
 extern FILE* yyin;
+extern int yydebug;
+extern int yyparse();
+
+extern int linenum;
 
 void createCorefuncs(CodeGenContext& context);
 
-int main() 
+void yyerror(const char *msg)
 {
+    printf("Error at line %d: %s.\n", linenum, msg);
+}
+
+int main()
+{
+    yydebug = 1;
     FILE* fp = fopen("./code.bgl", "r");
     if (fp) // the last thing we want is to parse a file that doesn't exist
         yyin = fp;
     else
-        std::cout << "code.bgl not found, enter code in stdin:" << std::endl;    
+        std::cout << "code.bgl not found, enter code in stdin:" << std::endl; 
     yyparse();
     std::cout << programBlock << std::endl;
 

@@ -13,7 +13,7 @@ void CodeGenContext::generateCode(NBlock& root)
 	/* Create the top level interpreter function to call as entry */
 	vector<Type*> argTypes;
 	FunctionType *ftype = FunctionType::get(Type::getVoidTy(GlobalContext), makeArrayRef(argTypes), false);
-	entry = Function::Create(ftype, GlobalValue::InternalLinkage, "main", module);
+	entry = Function::Create(ftype, GlobalValue::InternalLinkage, "bgrmain", module);
 	BasicBlock *bblock = BasicBlock::Create(GlobalContext, "entry", entry, 0);
 	
 	/* Push a new variable/block context */
@@ -48,10 +48,13 @@ GenericValue CodeGenContext::runCode() {
 static Type *typeOf(const NIdentifier& type) 
 {
 	if (type.name.compare("int") == 0) {
-		return Type::getInt64Ty(GlobalContext);
+		return Type::getInt32Ty(GlobalContext);
 	}
 	else if (type.name.compare("double") == 0) {
 		return Type::getDoubleTy(GlobalContext);
+	}
+	else if (type.name.compare("string") == 0) {
+		return Type::getInt8PtrTy(GlobalContext);
 	}
 	return Type::getVoidTy(GlobalContext);
 }
@@ -61,7 +64,13 @@ static Type *typeOf(const NIdentifier& type)
 Value* NInteger::codeGen(CodeGenContext& context)
 {
 	std::cout << "Creating integer: " << value << endl;
-	return ConstantInt::get(Type::getInt64Ty(GlobalContext), value, true);
+	return ConstantInt::get(Type::getInt32Ty(GlobalContext), value, true);
+}
+
+Value* NString::codeGen(CodeGenContext& context)
+{
+	std::cout << "Creating string literal: \"" << value << "\"\n";
+	return ConstantDataArray::getString(GlobalContext, value);
 }
 
 Value* NDouble::codeGen(CodeGenContext& context)

@@ -1,12 +1,17 @@
 %{
 	#include "node.h"
-        #include <cstdio>
-        #include <cstdlib>
+    #include <cstdio>
+    #include <cstdlib>
 	NBlock *programBlock; /* the top level root node of our final AST */
 
 	extern int yylex();
-	void yyerror(const char *s) { std::printf("Compiler error: %s\n", s);std::exit(1); }
+	extern void yyerror(const char*);
+	
+	#define YYDEBUG 1
+	#define YYERROR_VERBOSE
 %}
+
+%define parse.error verbose
 
 /* All the data. */
 %union {
@@ -23,15 +28,15 @@
 }
 
 /* Define our tokens, along with the node type they represent. This needs to match tokens.l for obvious reasons. */
-%token <string> TIDENTIFIER TINTEGER TDOUBLE
+%token <string> TIDENTIFIER TINTEGER TDOUBLE TQUOTE
 %token <token> TCEQ TCNE TCLT TCLE TCGT TCGE TEQUAL
-%token <token> TLPAREN TRPAREN TLBRACE TRBRACE TCOMMA TDOT
+%token <token> TLPAREN TRPAREN TLBRACE TRBRACE TCOMMA TDOT 
 %token <token> TPLUS TMINUS TMUL TDIV
 %token <token> TRETURN TEXTERN
 
 /* Define our nonterminal symbols, along with the node type they represent. */
 %type <ident> ident
-%type <expr> numeric expr 
+%type <expr> numeric expr string
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <block> program stmts block
@@ -96,6 +101,7 @@ expr : ident TEQUAL expr { $$ = new NAssignment(*$<ident>1, *$3); }
          | expr TMINUS expr { $$ = new NBinaryOperator(*$1, $2, *$3); }
  	 | expr comparison expr { $$ = new NBinaryOperator(*$1, $2, *$3); }
      | TLPAREN expr TRPAREN { $$ = $2; }
+	 | TQUOTE ident TQUOTE { $$ = new NString($2->name); delete $2; }
 	 ;
 	
 call_args : /*blank*/  { $$ = new ExpressionList(); }
