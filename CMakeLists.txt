@@ -11,7 +11,7 @@ message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 # Includes & definitions
-include_directories(${LLVM_INCLUDE_DIRS} include build)
+include_directories(${LLVM_INCLUDE_DIRS} include ${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(${LLVM_DEFINITIONS})
 
 flex_target(lexer src/tokens.l "${CMAKE_CURRENT_BINARY_DIR}/tokens.cpp")
